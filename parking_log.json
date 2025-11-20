@@ -1,0 +1,90 @@
+[
+  {
+    "timestamp": "2025-11-20T13:58:20.662052",
+    "type": "space_occupied",
+    "space_id": 1,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.856800563777308
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.665972",
+    "type": "space_occupied",
+    "space_id": 2,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 1.0041152263374487
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.669998",
+    "type": "space_occupied",
+    "space_id": 3,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.9986065954482118
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.673122",
+    "type": "space_occupied",
+    "space_id": 5,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.963457983790701
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.676877",
+    "type": "space_occupied",
+    "space_id": 6,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.8243315987798313
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.680571",
+    "type": "space_occupied",
+    "space_id": 7,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.916389811738649
+    }
+  },
+  {
+    "timestamp": "2025-11-20T13:58:20.684656",
+    "type": "space_occupied",
+    "space_id": 8,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.9543302701197438
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:01:26.159716",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 96.30160954002794,
+      "threshold": 100
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:01:45.990435",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 92.91393867445294,
+      "threshold": 100
+    }
+  }
+]
