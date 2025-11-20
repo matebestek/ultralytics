@@ -86,5 +86,243 @@
       "distance": 92.91393867445294,
       "threshold": 100
     }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:03.789658",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 24.166091947189145,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:04.763390",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 23.769728648009426,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:37.231398",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 23.259406699226016,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:37.567945",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 25.495097567963924,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:40.641487",
+    "type": "space_occupied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.3710300161913065
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:43.312631",
+    "type": "space_emptied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:03:49.828747",
+    "type": "space_occupied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.4189811931747416
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:00.477351",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 24.596747752497688,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:01.445298",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 24.166091947189145,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:03.983614",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 23.706539182259394,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:07.104396",
+    "type": "space_emptied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:51.193297",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 24.166091947189145,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:51.941707",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 23.259406699226016,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:56.135534",
+    "type": "space_occupied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.8484244613276871
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:04:57.419011",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 23.706539182259394,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:05:00.404835",
+    "type": "space_emptied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:05:49.556144",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 25.942243542145693,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:05:50.097728",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 79.40403012442127,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:05:50.917102",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 20.591260281974,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:06:06.148650",
+    "type": "space_occupied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.7470419728484244
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:06:08.700803",
+    "type": "my_car_vehicle_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 24.596747752497688,
+      "threshold": 100,
+      "vehicle_type": "car"
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:06:11.900426",
+    "type": "space_emptied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:06:37.033725",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 92.61209424259879,
+      "threshold": 100
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:06:49.785528",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 91.21403400793103,
+      "threshold": 100
+    }
   }
 ]
