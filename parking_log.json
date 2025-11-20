@@ -324,5 +324,33 @@
       "distance": 91.21403400793103,
       "threshold": 100
     }
+  },
+  {
+    "timestamp": "2025-11-20T14:07:38.939667",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 94.70480452437458,
+      "threshold": 100
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:07:52.985543",
+    "type": "space_occupied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.5862498443143604
+    }
+  },
+  {
+    "timestamp": "2025-11-20T14:08:03.051722",
+    "type": "my_car_person_proximity",
+    "space_id": 1,
+    "details": {
+      "distance": 86.6083136886985,
+      "threshold": 100
+    }
   }
 ]
