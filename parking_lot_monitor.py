@@ -1651,52 +1651,86 @@ class ParkingLotMonitor:
                     brightness_value = int(((0 - self.brightness_min) / (self.brightness_max - self.brightness_min)) * 100)
                     cv2.setTrackbarPos('Brightness', window_name, brightness_value)
                     print("💡 Brightness reset to 0")
-                elif key == ord(']') or key == ord('+'):
-                    # Switch to next camera
+                elif key in (ord(']'), ord('+'), ord('l')):
+                    # Switch to next camera (also accept 'l' as alternative)
                     with self.camera_lock:
                         cams = list(self.available_cameras)
                     if len(cams) > 1:
                         print("🔁 Switching to next camera...")
-                        try:
-                            cap.release()
-                        except:
-                            pass
+                        # Remember previous state
                         prev_index = camera_index
+                        prev_cam_id = cams[prev_index]['id'] if prev_index < len(cams) else None
+
+                        # Advance index safely
                         camera_index = (camera_index + 1) % len(cams)
-                        camera_id = cams[camera_index]['id']
-                        res = cams[camera_index].get('resolution', '')
+                        next_cam = cams[camera_index]
+                        camera_id = next_cam['id']
+                        res = next_cam.get('resolution', '')
                         print(f"📹 Trying camera {camera_id} ({res})")
+
+                        # Attempt to open new camera
+                        try:
+                            if 'cap' in locals() and cap is not None:
+                                try:
+                                    cap.release()
+                                except:
+                                    pass
+                        except NameError:
+                            pass
+
                         new_cap = self.setup_camera(camera_id)
                         if new_cap is None:
-                            print("⚠️ Failed to open new camera, reverting")
+                            print("⚠️ Failed to open new camera, reverting to previous camera")
                             camera_index = prev_index
-                            camera_id = cams[camera_index]['id']
-                            cap = self.setup_camera(camera_id)
+                            # Try to reopen previous camera
+                            try:
+                                prev_cam_id = cams[camera_index]['id']
+                                cap = self.setup_camera(prev_cam_id)
+                            except Exception:
+                                cap = None
+                                print("❌ Could not reopen previous camera")
                         else:
                             cap = new_cap
-                elif key == ord('[') or key == ord('-'):
-                    # Switch to previous camera
+                    else:
+                        print("⚠️ Not enough cameras to switch")
+                elif key in (ord('['), ord('-'), ord('h')):
+                    # Switch to previous camera (also accept 'h' as alternative)
                     with self.camera_lock:
                         cams = list(self.available_cameras)
                     if len(cams) > 1:
                         print("🔁 Switching to previous camera...")
-                        try:
-                            cap.release()
-                        except:
-                            pass
                         prev_index = camera_index
+
+                        # Move back safely
                         camera_index = (camera_index - 1) % len(cams)
-                        camera_id = cams[camera_index]['id']
-                        res = cams[camera_index].get('resolution', '')
+                        prev_cam = cams[camera_index]
+                        camera_id = prev_cam['id']
+                        res = prev_cam.get('resolution', '')
                         print(f"📹 Trying camera {camera_id} ({res})")
+
+                        try:
+                            if 'cap' in locals() and cap is not None:
+                                try:
+                                    cap.release()
+                                except:
+                                    pass
+                        except NameError:
+                            pass
+
                         new_cap = self.setup_camera(camera_id)
                         if new_cap is None:
-                            print("⚠️ Failed to open new camera, reverting")
+                            print("⚠️ Failed to open previous camera, reverting to original")
                             camera_index = prev_index
-                            camera_id = cams[camera_index]['id']
-                            cap = self.setup_camera(camera_id)
+                            try:
+                                orig_cam_id = cams[camera_index]['id']
+                                cap = self.setup_camera(orig_cam_id)
+                            except Exception:
+                                cap = None
+                                print("❌ Could not reopen original camera")
                         else:
                             cap = new_cap
+                    else:
+                        print("⚠️ Not enough cameras to switch")
                 elif key == ord('t'):
                     # Toggle selection mode
                     self.selection_mode = not self.selection_mode
