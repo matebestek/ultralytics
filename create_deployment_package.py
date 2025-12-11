@@ -8,7 +8,7 @@ from pathlib import Path
 
 def create_deployment_package():
     # Define package name and paths
-    package_name = "parking-lot-monitor-deploy"
+    package_name = "parking-lot-monitor-deploy-v2"
     source_dir = Path(".")
     deploy_dir = Path(package_name)
     
@@ -25,6 +25,7 @@ def create_deployment_package():
         "parking_lot_monitor.py",
         "requirements.txt",
         "DEPLOYMENT_README.md",
+        "PATTERN_ANALYTICS.md",
         "start.bat",
         "start.sh",
         "yolo11n.pt"

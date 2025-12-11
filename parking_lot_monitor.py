@@ -76,9 +76,188 @@ class ParkingLotMonitor:
         self.person_near_my_car = False
         self.vehicle_near_my_car = False
         
+        # Pattern learning and analytics
+        self.analytics_file = "parking_analytics.json"
+        self.pattern_data = {}  # {space_id: {'occupancy_events': [], 'empty_events': [], 'durations': []}}
+        self.load_analytics()
+        
         # Load saved configuration if exists
         self.config_file = "parking_config.json"
         self.load_configuration()
+
+        # Camera hot-plug support
+        self.available_cameras = []
+        self.camera_lock = threading.Lock()
+        self.camera_scanner_thread = None
+        self.stop_camera_scanner = False
+
+    def camera_scanner_loop(self, interval=5):
+        """Background thread that rescans cameras periodically to detect hot-plug events."""
+        while not self.stop_camera_scanner:
+            try:
+                cams = self.find_working_cameras()
+                with self.camera_lock:
+                    # replace available cameras list
+                    self.available_cameras = cams
+            except Exception:
+                pass
+            time.sleep(interval)
+    
+    def load_analytics(self):
+        """Load parking analytics and pattern data."""
+        if os.path.exists(self.analytics_file):
+            try:
+                with open(self.analytics_file, 'r') as f:
+                    self.pattern_data = json.load(f)
+                print(f"\u2705 Loaded analytics for {len(self.pattern_data)} parking spaces")
+            except Exception as e:
+                print(f"\u26a0\ufe0f Could not load analytics: {e}")
+                self.pattern_data = {}
+        else:
+            self.pattern_data = {}
+    
+    def save_analytics(self):
+        """Save parking analytics and pattern data."""
+        try:
+            with open(self.analytics_file, 'w') as f:
+                json.dump(self.pattern_data, f, indent=2)
+        except Exception as e:
+            print(f"\u26a0\ufe0f Could not save analytics: {e}")
+    
+    def record_occupancy_event(self, space_id, event_type, timestamp=None):
+        """Record parking space occupancy event for pattern analysis."""
+        if timestamp is None:
+            timestamp = time.time()
+        
+        # Initialize space analytics if not exists
+        if str(space_id) not in self.pattern_data:
+            self.pattern_data[str(space_id)] = {
+                'occupancy_events': [],
+                'empty_events': [],
+                'last_change': None,
+                'total_occupied_duration': 0,
+                'total_empty_duration': 0,
+                'hourly_stats': {}  # Hour of day -> {occupied_count, empty_count}
+            }
+        
+        space_data = self.pattern_data[str(space_id)]
+        dt = datetime.fromtimestamp(timestamp)
+        hour = dt.hour
+        day_of_week = dt.strftime('%A')
+        
+        event_record = {
+            'timestamp': timestamp,
+            'datetime': dt.isoformat(),
+            'hour': hour,
+            'day_of_week': day_of_week
+        }
+        
+        # Calculate duration since last change
+        if space_data['last_change'] is not None:
+            duration = timestamp - space_data['last_change']
+            event_record['duration'] = duration
+            
+            # Update total durations
+            if event_type == 'occupied':
+                space_data['total_empty_duration'] += duration
+            else:
+                space_data['total_occupied_duration'] += duration
+        
+        # Record event
+        if event_type == 'occupied':
+            space_data['occupancy_events'].append(event_record)
+        else:
+            space_data['empty_events'].append(event_record)
+        
+        # Update hourly statistics
+        if str(hour) not in space_data['hourly_stats']:
+            space_data['hourly_stats'][str(hour)] = {'occupied': 0, 'empty': 0}
+        space_data['hourly_stats'][str(hour)][event_type] += 1
+        
+        space_data['last_change'] = timestamp
+        
+        # Keep only last 1000 events per type
+        space_data['occupancy_events'] = space_data['occupancy_events'][-1000:]
+        space_data['empty_events'] = space_data['empty_events'][-1000:]
+        
+        # Save analytics periodically (every 10 events)
+        total_events = len(space_data['occupancy_events']) + len(space_data['empty_events'])
+        if total_events % 10 == 0:
+            self.save_analytics()
+    
+    def get_pattern_predictions(self, space_id):
+        """Get pattern-based predictions for when space is likely to become empty."""
+        if str(space_id) not in self.pattern_data:
+            return None
+        
+        space_data = self.pattern_data[str(space_id)]
+        now = datetime.now()
+        current_hour = now.hour
+        
+        # Calculate average durations
+        occupied_events = space_data['occupancy_events']
+        empty_events = space_data['empty_events']
+        
+        if len(occupied_events) < 5:
+            return None  # Not enough data
+        
+        # Calculate average occupied duration
+        durations = [e.get('duration', 0) for e in empty_events if 'duration' in e]
+        avg_occupied_duration = sum(durations) / len(durations) if durations else 0
+        
+        # Get hourly patterns
+        hourly_stats = space_data['hourly_stats']
+        
+        # Find peak empty hours
+        empty_hours = []
+        for hour_str, stats in hourly_stats.items():
+            hour = int(hour_str)
+            empty_count = stats['empty']
+            if empty_count > 0:
+                empty_hours.append((hour, empty_count))
+        
+        empty_hours.sort(key=lambda x: x[1], reverse=True)
+        
+        return {
+            'avg_occupied_duration_minutes': avg_occupied_duration / 60 if avg_occupied_duration > 0 else None,
+            'total_occupied_events': len(occupied_events),
+            'total_empty_events': len(empty_events),
+            'peak_empty_hours': empty_hours[:3],  # Top 3 hours
+            'current_hour_empty_probability': hourly_stats.get(str(current_hour), {}).get('empty', 0) / max(1, len(empty_events)) * 100
+        }
+    
+    def display_analytics_summary(self):
+        """Display analytics summary for all parking spaces."""
+        print("\n" + "="*60)
+        print("📊 PARKING PATTERN ANALYTICS")
+        print("="*60)
+        
+        if not self.pattern_data:
+            print("No pattern data available yet.")
+            return
+        
+        for space_id_str, data in self.pattern_data.items():
+            space_id = int(space_id_str)
+            predictions = self.get_pattern_predictions(space_id)
+            
+            if predictions is None:
+                continue
+            
+            print(f"\n🅿️ Space #{space_id}:")
+            print(f"   Total Events: {predictions['total_occupied_events']} occupied, {predictions['total_empty_events']} empty")
+            
+            if predictions['avg_occupied_duration_minutes']:
+                print(f"   Avg Occupied Duration: {predictions['avg_occupied_duration_minutes']:.1f} minutes")
+            
+            if predictions['peak_empty_hours']:
+                print(f"   Peak Empty Hours: ", end="")
+                for hour, count in predictions['peak_empty_hours']:
+                    print(f"{hour:02d}:00 ({count}x), ", end="")
+                print()
+            
+            print(f"   Current Hour Empty Probability: {predictions['current_hour_empty_probability']:.1f}%")
+        
+        print("\n" + "="*60)
     
     def load_configuration(self):
         """Load parking space configuration from file."""
@@ -545,6 +724,10 @@ class ParkingLotMonitor:
                         state['pending_state'] = None
                         state['pending_since'] = None
                         
+                        # Record pattern event for analytics
+                        event_type_pattern = 'occupied' if is_occupied else 'empty'
+                        self.record_occupancy_event(space_id, event_type_pattern, current_time)
+                        
                         # Log event
                         if is_occupied:
                             event_type = 'space_occupied'
@@ -943,13 +1126,25 @@ class ParkingLotMonitor:
             polygon = space['polygon']
             state = self.space_states[space_id]
             
-            # Determine color based on state
+            # Get pattern predictions for this space
+            predictions = self.get_pattern_predictions(space_id)
+            empty_probability = predictions['current_hour_empty_probability'] if predictions else 0
+            
+            # Determine color based on state and probability
             if state.get('pending_state') is not None:
                 color = self.color_pending
                 status_text = "PENDING"
             elif state['occupied']:
-                color = self.color_occupied
-                status_text = "OCCUPIED"
+                # Color-code occupied spaces by probability of becoming empty
+                if empty_probability > 50:
+                    color = (0, 200, 0)  # Bright green - likely to empty soon
+                    status_text = "OCCUPIED (LIKELY EMPTY SOON)"
+                elif empty_probability > 20:
+                    color = (0, 200, 200)  # Yellow-green - moderate chance
+                    status_text = "OCCUPIED (MAY EMPTY SOON)"
+                else:
+                    color = self.color_occupied
+                    status_text = "OCCUPIED"
             else:
                 color = self.color_empty
                 status_text = "EMPTY"
@@ -981,8 +1176,34 @@ class ParkingLotMonitor:
             cv2.putText(frame, status_text, (cx - 40, cy + 20), 
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
             
+            # Show pattern predictions if available
+            if predictions and predictions['total_occupied_events'] > 0:
+                y_offset = 40
+                
+                # Show probability
+                prob_text = f"P(empty): {empty_probability:.0f}%"
+                cv2.putText(frame, prob_text, (cx - 50, cy + y_offset), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.4, (0, 255, 0) if empty_probability > 50 else (255, 255, 255), 1)
+                y_offset += 15
+                
+                # Show average duration
+                if predictions['avg_occupied_duration_minutes']:
+                    duration = predictions['avg_occupied_duration_minutes']
+                    dur_text = f"Avg: {duration:.0f}min"
+                    cv2.putText(frame, dur_text, (cx - 50, cy + y_offset), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (200, 200, 200), 1)
+                    y_offset += 15
+                
+                # Show peak empty hours (first 2 only for space)
+                if predictions['peak_empty_hours']:
+                    peak_hours = predictions['peak_empty_hours'][:2]
+                    hours_str = ",".join([f"{h:02d}:00" for h, _ in peak_hours])
+                    peak_text = f"Peak: {hours_str}"
+                    cv2.putText(frame, peak_text, (cx - 50, cy + y_offset), 
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (150, 150, 255), 1)
+            
             # Show debug info if enabled
-            if self.debug_mode and 'debug_info' in state:
+            elif self.debug_mode and 'debug_info' in state:
                 debug = state['debug_info']
                 debug_text = f"Overlap: {debug['overlap']:.3f}"
                 cv2.putText(frame, debug_text, (cx - 50, cy + 40), 
@@ -1122,17 +1343,30 @@ class ParkingLotMonitor:
         
         # Find cameras
         cameras = self.find_working_cameras()
-        
         if not cameras:
             print("\n❌ No working cameras found!")
             return
-        
-        # Select first camera by default
-        camera_id = cameras[0]['id']
-        print(f"\n✅ Using camera {camera_id} ({cameras[0]['resolution']})")
-        if len(cameras) > 1:
-            print(f"   (Found {len(cameras)} cameras total)")
-        
+
+        # Initialize available cameras and start hot-plug scanner
+        with self.camera_lock:
+            self.available_cameras = cameras
+
+        # Start background scanner to detect newly attached/removed cameras
+        self.stop_camera_scanner = False
+        self.camera_scanner_thread = threading.Thread(target=self.camera_scanner_loop, daemon=True)
+        self.camera_scanner_thread.start()
+
+        # Select first camera by default and track index for runtime switching
+        camera_index = 0
+        with self.camera_lock:
+            camera_id = self.available_cameras[camera_index]['id']
+            res = self.available_cameras[camera_index].get('resolution', '')
+            total_cams = len(self.available_cameras)
+
+        print(f"\n✅ Using camera {camera_id} ({res})")
+        if total_cams > 1:
+            print(f"   (Found {total_cams} cameras total) - use '[' or '-' for previous, ']' or '+' for next camera")
+
         cap = self.setup_camera(camera_id)
         if cap is None:
             return
@@ -1157,7 +1391,9 @@ class ParkingLotMonitor:
         print("  b = reset brightness")
         print("  t = toggle selection mode (only selected cars)")
         print("  x = clear all car selections")
+        print("  a = show parking pattern analytics")
         print("  m = set/unset my car space (type space number)")
+        print("  [ / ] or - / + = previous / next camera")
         print("  1-9 = toggle occupancy for parking space #1-#9")
         print("  0 then number = toggle space #10+ (e.g., 0 then 1 then 2 = space #12)")
         
@@ -1369,6 +1605,14 @@ class ParkingLotMonitor:
                 
                 cv2.putText(frame, controls, (20, height - 20),
                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+
+                # Small on-screen prompt for camera switching
+                try:
+                    camera_hint = "Camera: [ / ]  or  - / +  to switch"
+                    cv2.putText(frame, camera_hint, (max(20, width - 420), 30),
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1, cv2.LINE_AA)
+                except Exception:
+                    pass
                 
                 # Show frame
                 cv2.imshow(window_name, frame)
@@ -1407,6 +1651,52 @@ class ParkingLotMonitor:
                     brightness_value = int(((0 - self.brightness_min) / (self.brightness_max - self.brightness_min)) * 100)
                     cv2.setTrackbarPos('Brightness', window_name, brightness_value)
                     print("💡 Brightness reset to 0")
+                elif key == ord(']') or key == ord('+'):
+                    # Switch to next camera
+                    with self.camera_lock:
+                        cams = list(self.available_cameras)
+                    if len(cams) > 1:
+                        print("🔁 Switching to next camera...")
+                        try:
+                            cap.release()
+                        except:
+                            pass
+                        prev_index = camera_index
+                        camera_index = (camera_index + 1) % len(cams)
+                        camera_id = cams[camera_index]['id']
+                        res = cams[camera_index].get('resolution', '')
+                        print(f"📹 Trying camera {camera_id} ({res})")
+                        new_cap = self.setup_camera(camera_id)
+                        if new_cap is None:
+                            print("⚠️ Failed to open new camera, reverting")
+                            camera_index = prev_index
+                            camera_id = cams[camera_index]['id']
+                            cap = self.setup_camera(camera_id)
+                        else:
+                            cap = new_cap
+                elif key == ord('[') or key == ord('-'):
+                    # Switch to previous camera
+                    with self.camera_lock:
+                        cams = list(self.available_cameras)
+                    if len(cams) > 1:
+                        print("🔁 Switching to previous camera...")
+                        try:
+                            cap.release()
+                        except:
+                            pass
+                        prev_index = camera_index
+                        camera_index = (camera_index - 1) % len(cams)
+                        camera_id = cams[camera_index]['id']
+                        res = cams[camera_index].get('resolution', '')
+                        print(f"📹 Trying camera {camera_id} ({res})")
+                        new_cap = self.setup_camera(camera_id)
+                        if new_cap is None:
+                            print("⚠️ Failed to open new camera, reverting")
+                            camera_index = prev_index
+                            camera_id = cams[camera_index]['id']
+                            cap = self.setup_camera(camera_id)
+                        else:
+                            cap = new_cap
                 elif key == ord('t'):
                     # Toggle selection mode
                     self.selection_mode = not self.selection_mode
@@ -1418,6 +1708,13 @@ class ParkingLotMonitor:
                     cleared_count = len(self.selected_cars)
                     self.selected_cars.clear()
                     print(f"🧹 Cleared {cleared_count} car selections")
+                elif key == ord('a'):
+                    # Display analytics summary
+                    print("\n" + "="*80)
+                    print("📊 PARKING PATTERN ANALYTICS")
+                    print("="*80)
+                    self.display_analytics_summary()
+                    print("="*80 + "\n")
                 elif key == ord('m'):
                     # Set my car space
                     print("\n🚗 Enter parking space number for YOUR car (or 0 to disable):")

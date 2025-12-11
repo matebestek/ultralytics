@@ -8,6 +8,8 @@ Advanced parking lot monitoring system with YOLO11 object detection, real-time c
 - ✅ Manual car selection and tracking
 - ✅ Movement detection with notifications
 - ✅ Interactive parking space definition
+- ✅ **Pattern learning & predictive analytics**
+- ✅ **On-screen probability overlay (color-coded)**
 - ✅ Configuration persistence (JSON)
 - ✅ Multi-camera support (auto-selects first)
 - ✅ Popup notifications for events
@@ -96,11 +98,37 @@ The system automatically:
 - `s` = Save configuration
 - `d` = Toggle debug info
 - `n` = Toggle notifications
+- `a` = **Show pattern analytics summary**
 - `t` = Toggle selection mode (only alert for selected cars)
 - `x` = Clear all car selections
 - `b` = Reset brightness
 - `m` = Set "my car" space (type number)
 - `1-9` = Toggle parking space occupancy manually
+- `[` / `]` or `-` / `+` = Switch previous / next camera during runtime (hot-plug supported)
+
+### Pattern Analytics 📊
+
+**Predictive Features:**
+The system learns parking patterns and displays real-time predictions on-screen!
+
+- **Color-Coded Spaces:**
+  - 🟢 **Bright Green** = Occupied, >50% likely to empty soon
+  - 🟡 **Yellow-Green** = Occupied, 20-50% chance to empty soon
+  - 🔴 **Red** = Occupied, <20% chance to empty soon
+
+- **On-Screen Overlay:**
+  - `P(empty): 75%` = Probability space will be empty this hour
+  - `Avg: 45min` = Average occupied duration
+  - `Peak: 09:00,17:00` = Times space most often becomes empty
+
+**View Full Analytics:**
+Press **'a'** to see detailed pattern analysis:
+- Total occupied/empty events
+- Average durations
+- Peak empty hours with frequency counts
+- Current hour probabilities
+
+**See:** `PATTERN_ANALYTICS.md` for complete documentation
 
 ### Advanced Features
 
@@ -138,6 +166,15 @@ Event logging (last 100 events):
 - Car movement alerts
 - Manual overrides
 - Security events
+
+### `parking_analytics.json`
+**NEW:** Pattern learning data storage:
+- Occupancy events with timestamps
+- Empty events with durations
+- Hourly statistics (0-23)
+- Used for predictive analytics
+
+**Note:** This file grows over time. Delete to reset pattern learning.
 
 ## Troubleshooting
 
@@ -201,6 +238,8 @@ parking-lot-monitor/
 ├── yolo11n.pt                # YOLO model weights
 ├── parking_config.json       # Generated parking space config
 ├── parking_log.json          # Event logs
+├── parking_analytics.json    # Pattern learning data (NEW)
+├── PATTERN_ANALYTICS.md      # Analytics documentation (NEW)
 └── README.md                 # This file
 ```
 
