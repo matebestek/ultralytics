@@ -1,32 +1,242 @@
 [
   {
-    "timestamp": "2025-12-11T11:59:44.798521",
+    "timestamp": "2025-12-12T12:30:36.977255",
+    "type": "space_occupied",
+    "space_id": 5,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.20119436940139343
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:30:36.978798",
     "type": "space_occupied",
     "space_id": 6,
     "details": {
       "previous_state": "empty",
       "new_state": "occupied",
-      "overlap": 0.31724385429750585
+      "overlap": 0.2291404988336623
     }
   },
   {
-    "timestamp": "2025-12-11T11:59:44.800435",
+    "timestamp": "2025-12-12T12:30:36.980098",
     "type": "space_occupied",
     "space_id": 7,
     "details": {
       "previous_state": "empty",
       "new_state": "occupied",
-      "overlap": 0.36175710594315247
+      "overlap": 0.3135843484680694
     }
   },
   {
-    "timestamp": "2025-12-11T11:59:44.803747",
+    "timestamp": "2025-12-12T12:30:36.982465",
     "type": "space_occupied",
     "space_id": 9,
     "details": {
       "previous_state": "empty",
       "new_state": "occupied",
-      "overlap": 0.735957155311994
+      "overlap": 0.24947066882550753
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:30:45.326369",
+    "type": "space_emptied",
+    "space_id": 9,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:31:02.914620",
+    "type": "manual_override",
+    "space_id": 1,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.465692",
+    "type": "space_occupied",
+    "space_id": 12,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 1.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.467460",
+    "type": "space_occupied",
+    "space_id": 13,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.9336112892880052
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.469037",
+    "type": "space_occupied",
+    "space_id": 14,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.9643167972149695
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.470500",
+    "type": "space_occupied",
+    "space_id": 15,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.975177304964539
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.472015",
+    "type": "space_occupied",
+    "space_id": 16,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.9941887494188749
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:06.473683",
+    "type": "space_occupied",
+    "space_id": 17,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "overlap": 0.7493214902541327
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:16.390223",
+    "type": "manual_override",
+    "space_id": 18,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:18.654555",
+    "type": "space_emptied",
+    "space_id": 18,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:49.269252",
+    "type": "manual_override",
+    "space_id": 19,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:33:51.516997",
+    "type": "space_emptied",
+    "space_id": 19,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:05.555190",
+    "type": "manual_override",
+    "space_id": 19,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:07.825262",
+    "type": "space_emptied",
+    "space_id": 19,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:38.436310",
+    "type": "manual_override",
+    "space_id": 20,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:40.689386",
+    "type": "space_emptied",
+    "space_id": 20,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:47.636653",
+    "type": "manual_override",
+    "space_id": 20,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:34:49.906118",
+    "type": "space_emptied",
+    "space_id": 20,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:35:20.652571",
+    "type": "manual_override",
+    "space_id": 21,
+    "details": {
+      "previous_state": "empty",
+      "new_state": "occupied",
+      "method": "manual_keyboard"
+    }
+  },
+  {
+    "timestamp": "2025-12-12T12:35:22.912591",
+    "type": "space_emptied",
+    "space_id": 21,
+    "details": {
+      "previous_state": "occupied",
+      "new_state": "empty",
+      "overlap": 0.0
     }
   }
 ]

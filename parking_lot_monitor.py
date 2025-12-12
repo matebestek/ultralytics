@@ -14,6 +14,7 @@ import os
 from collections import deque
 import math
 import threading
+import argparse
 
 class ParkingLotMonitor:
     def __init__(self):
@@ -89,7 +90,11 @@ class ParkingLotMonitor:
         self.available_cameras = []
         self.camera_lock = threading.Lock()
         self.camera_scanner_thread = None
-        self.stop_camera_scanner = False
+        # Scanner is off by default; enable with key or CLI
+        self.stop_camera_scanner = True
+        self.camera_scanner_enabled = False
+        # Preferred camera index (set via CLI --camera)
+        self.preferred_camera = None
 
     def camera_scanner_loop(self, interval=5):
         """Background thread that rescans cameras periodically to detect hot-plug events."""
@@ -1351,17 +1356,59 @@ class ParkingLotMonitor:
         with self.camera_lock:
             self.available_cameras = cameras
 
-        # Start background scanner to detect newly attached/removed cameras
-        self.stop_camera_scanner = False
-        self.camera_scanner_thread = threading.Thread(target=self.camera_scanner_loop, daemon=True)
-        self.camera_scanner_thread.start()
+        # Start background scanner only if enabled (toggle with 'g' key)
+        if getattr(self, 'camera_scanner_enabled', False):
+            self.stop_camera_scanner = False
+            if self.camera_scanner_thread is None or not self.camera_scanner_thread.is_alive():
+                self.camera_scanner_thread = threading.Thread(target=self.camera_scanner_loop, daemon=True)
+                self.camera_scanner_thread.start()
+        else:
+            self.stop_camera_scanner = True
 
-        # Select first camera by default and track index for runtime switching
+        # Allow manual camera selection when multiple cameras are available
         camera_index = 0
+        with self.camera_lock:
+            total_cams = len(self.available_cameras)
+
+        if total_cams > 1:
+            # If a preferred camera was set via CLI, try to use it (interpreted as index)
+            if self.preferred_camera is not None:
+                try:
+                    pref = int(self.preferred_camera)
+                    if 0 <= pref < total_cams:
+                        camera_index = pref
+                        print(f"\nUsing preferred camera index {camera_index} from CLI")
+                    else:
+                        print(f"\n⚠️ Preferred camera index {pref} out of range, will prompt")
+                        self.preferred_camera = None
+                except Exception:
+                    print("\n⚠️ Invalid preferred camera value, will prompt")
+                    self.preferred_camera = None
+
+            if self.preferred_camera is None:
+                print("\nAvailable cameras:")
+                with self.camera_lock:
+                    for idx, cam in enumerate(self.available_cameras):
+                        cam_id = cam.get('id')
+                        res = cam.get('resolution', '')
+                        name = cam.get('name', '')
+                        print(f"  [{idx}] id={cam_id} {res} {name}")
+
+                # Prompt user to choose camera index (press Enter to accept default 0)
+                try:
+                    sel = input(f"\nSelect camera index [0-{total_cams-1}] or press Enter to use 0: ").strip()
+                    if sel != "":
+                        sel_idx = int(sel)
+                        if 0 <= sel_idx < total_cams:
+                            camera_index = sel_idx
+                        else:
+                            print("⚠️ Invalid index, using default 0")
+                except Exception:
+                    print("⚠️ Invalid input, using default 0")
+
         with self.camera_lock:
             camera_id = self.available_cameras[camera_index]['id']
             res = self.available_cameras[camera_index].get('resolution', '')
-            total_cams = len(self.available_cameras)
 
         print(f"\n✅ Using camera {camera_id} ({res})")
         if total_cams > 1:
@@ -1388,6 +1435,7 @@ class ParkingLotMonitor:
         print("  s = save configuration")
         print("  d = toggle debug info")
         print("  n = toggle notifications")
+        print("  g = toggle camera hot-plug scanning (on-demand)")
         print("  b = reset brightness")
         print("  t = toggle selection mode (only selected cars)")
         print("  x = clear all car selections")
@@ -1646,6 +1694,20 @@ class ParkingLotMonitor:
                 elif key == ord('n'):
                     self.notifications_enabled = not self.notifications_enabled
                     print(f"🔔 Notifications: {'ON' if self.notifications_enabled else 'OFF'}")
+                elif key == ord('g'):
+                    # Toggle camera hot-plug scanner on-demand
+                    self.camera_scanner_enabled = not getattr(self, 'camera_scanner_enabled', False)
+                    if self.camera_scanner_enabled:
+                        # Start scanner thread
+                        self.stop_camera_scanner = False
+                        if self.camera_scanner_thread is None or not self.camera_scanner_thread.is_alive():
+                            self.camera_scanner_thread = threading.Thread(target=self.camera_scanner_loop, daemon=True)
+                            self.camera_scanner_thread.start()
+                        print("🔁 Camera hot-plug scanning: ON")
+                    else:
+                        # Signal scanner to stop
+                        self.stop_camera_scanner = True
+                        print("⏸️ Camera hot-plug scanning: OFF")
                 elif key == ord('b'):
                     self.brightness = 0
                     brightness_value = int(((0 - self.brightness_min) / (self.brightness_max - self.brightness_min)) * 100)
@@ -1845,7 +1907,13 @@ def main():
     print("  💾 Save/load configuration")
     print("\n🚀 Starting monitor...")
     
+    parser = argparse.ArgumentParser(description="Parking Lot Monitor")
+    parser.add_argument('-c', '--camera', type=int, help='Preferred camera index to use (0-based)')
+    args = parser.parse_args()
+
     monitor = ParkingLotMonitor()
+    if args.camera is not None:
+        monitor.preferred_camera = args.camera
     monitor.run_monitor()
 
 if __name__ == "__main__":
